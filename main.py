@@ -11,6 +11,7 @@ def gcs2pubsub(data, context):
 	project_id = os.environ['GCLOUD_PROJECT']
 	print('ProjectID: {}'.format(project_id))
 
+	# read from cloud storage by cloud functions' default service account
 	storage_client = storage.Client()
 	bucket = storage_client.bucket(data['bucket'])
 	file = bucket.get_blob(data['name'])
@@ -18,8 +19,10 @@ def gcs2pubsub(data, context):
 
 	print('Contents: {}'.format(contents))
 
+    # convert from json string to object
 	array = json.loads(contents)
 
+    # initialize pubsub publisher
 	publisher = pubsub_v1.PublisherClient()
 	tp = 'projects/{project_id}/topics/{topic}'.format(
 			project_id=project_id,
@@ -27,6 +30,7 @@ def gcs2pubsub(data, context):
 		)
 	print('Topic: {}'.format(tp))
 
+    # publish to pub/sub and convert data
 	for game in array:
 		location = game["location"]
 		fifa_id = game["fifa_id"]
